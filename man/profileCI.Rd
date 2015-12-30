@@ -33,6 +33,7 @@ profileCI(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL,
   \item{alpha}{ A confidence interval with confidence level 1-alpha is constructed. The value of alpha must be between 0 and 1; 
                 the default is 0.05.  }
   \item{x}{ An object, produced by the \code{profileCI} function, to print.}
+  \item{verbose}{To plot the profile, set this to \code{TRUE}.}
   \item{\dots}{ Further arguments passed to or from other methods.}
   }
 \details{ 

@@ -1,10 +1,11 @@
-profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Customized model", neg=TRUE, alpha=0.05)
+profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Customized model", neg=TRUE, alpha=0.05,
+                      verbose = FALSE)
 {
         X<-as.matrix(X)
         t <- ifelse(dfreq,dim(X)[2]-1,dim(X)[2])
 
         #####################################################################################################################################
-        # Validation des arguments fournis en entrée
+        # Validation des arguments fournis en entr?e
 
         # Argument dfreq
         if(!is.logical(dfreq)||!isTRUE(all.equal(length(dfreq),1))) stop("'dfreq' must be a logical object of length 1")
@@ -46,7 +47,7 @@ profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Cus
         mXsans <- if (isTRUE(all.equal(mX,NULL))) Xclosedp(t,m,h,a)$mat else mX
         rd.call <- match.call()
                       
-######### Obtention de l'estimateur de N (sans mu_0). Note : c'est approximatif, on n'ajuste donc pas pour les eta négatifs modèles Chao
+######### Obtention de l'estimateur de N (sans mu_0). Note : c'est approximatif, on n'ajuste donc pas pour les eta n?gatifs mod?les Chao
         anasans <- glm(Y~mXsans,family=poisson)
         Np <- sum(Y)+exp(anasans$coef[1])
         varcov <- summary(anasans)$cov.unscaled
@@ -54,17 +55,17 @@ profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Cus
                                
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
-# Idée d'algorithme:
-#     - D'abord fixer une borne maximale pour la borne supérieure d'un intervalle de confiance pour mu_0.
-#       J'utilise l'intervalle de confiance pour mu_0 chapeau de la régression poisson, construit en postulant la normalité asymptotique.
-#     - Ensuite, calculer la log vraisemblance multinommiale profile en 21 points également répartis entre 0 et la borne max inclusivement
-#     - Positionner la valeur maximale parmis ces 21 valeurs et calculer la log vraisemblance multinommiale en 9 points répartis également
-#       entre mu_0_max et mu_0_max+ et en 9 points répartis également entre mu_0_max- et mu_0_max.
-#     - Continuer ce "zoom" jusqu'à ce que mes points soient des entiers consécutifs.
+# Id?e d'algorithme:
+#     - D'abord fixer une borne maximale pour la borne sup?rieure d'un intervalle de confiance pour mu_0.
+#       J'utilise l'intervalle de confiance pour mu_0 chapeau de la r?gression poisson, construit en postulant la normalit? asymptotique.
+#     - Ensuite, calculer la log vraisemblance multinommiale profile en 21 points ?galement r?partis entre 0 et la borne max inclusivement
+#     - Positionner la valeur maximale parmis ces 21 valeurs et calculer la log vraisemblance multinommiale en 9 points r?partis ?galement
+#       entre mu_0_max et mu_0_max+ et en 9 points r?partis ?galement entre mu_0_max- et mu_0_max.
+#     - Continuer ce "zoom" jusqu'? ce que mes points soient des entiers cons?cutifs.
 #-------------------------------------------------------------------------------------------------------------------------------------------
 
 
-######### Détermination des 21 points de départ
+######### D?termination des 21 points de d?part
         saut <- round((Np-sum(Y)+2*qnorm(1-alpha/2)*SEp)/20)
         points <- (0:20)*saut
         
@@ -82,25 +83,25 @@ profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Cus
                     anaavec <- glm(Yavec~mXavec,family=poisson)
                     
                     #############################################################################################################
-                    # Vérification eta négatifs pour modèles Chao
+                    # V?rification eta n?gatifs pour mod?les Chao
                     if(neg)
                     {
                         if ((identical(m,"Mh")||identical(m,"Mth"))&&identical(h,"Chao"))
                         {
-                            # Réajustement du modèle en enlevant les eta négatifs
+                            # R?ajustement du mod?le en enlevant les eta n?gatifs
                             ppositions <- 0
                             param <- anaavec$coef
                             indic <- as.vector(c(rep(0,length(param)-t+2),ifelse(param[(length(param)-t+3):length(param)]<0,1,0)))
-                            while(isTRUE(sum(indic)>0)) # Répéter la boucle jusqu'à ce qu'aucun eta ne soit négatif
+                            while(isTRUE(sum(indic)>0)) # R?p?ter la boucle jusqu'? ce qu'aucun eta ne soit n?gatif
                             {
-                                # Détermination de la position du premier eta négatif
+                                # D?termination de la position du premier eta n?gatif
                                 pos <- 1
                                 while(isTRUE(all.equal(indic[pos],0))) pos <- pos + 1
                                 ppositions <- c(ppositions,pos)
-                                # Retrait de la bonne colonne de mX et réajustement du modèle
+                                # Retrait de la bonne colonne de mX et r?ajustement du mod?le
                                 mXavec <- matrix(mXavec[,-(pos-sum(ppositions<pos))],nrow=dim(mXavec)[1])
                                 anaavec <- glm(Yavec~mXavec,family=poisson)
-                                # Ajout de zéros dans le vecteur des paramètres loglinéaires
+                                # Ajout de z?ros dans le vecteur des param?tres loglin?aires
                                 positions <- sort(ppositions[-1])                
                                 param <- c(anaavec$coef[1:(positions[1]-1)],0)
                                 if(isTRUE(length(positions)>1))
@@ -145,11 +146,11 @@ profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Cus
                 points_c <- points_c[order(points_c)]
             }
 
-            # Objets relatifs à l'itération
+            # Objets relatifs ? l'it?ration
             if(saut==1) continue <- FALSE
             iter <- iter + 1
             
-            # Détermination du maximum et des points suivants
+            # D?termination du maximum et des points suivants
             lmax <- max(loglik_c)
             pos_lmax <- 1
             while(loglik_c[pos_lmax]<lmax) { pos_lmax <- pos_lmax + 1 }
@@ -161,11 +162,11 @@ profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Cus
         }
 
 
-######### Déterminiation du N qui maximise la log vraisemblance multinomiale profile 
+######### D?terminiation du N qui maximise la log vraisemblance multinomiale profile 
         x <- sum(Y)+points_c
         N <- x[pos_lmax]
         
-######### Interpolation linéaire pour trouver la valeur approximative des bornes de l'intervalle
+######### Interpolation lin?aire pour trouver la valeur approximative des bornes de l'intervalle
         sup<-loglik_c>(lmax-qchisq(1-alpha,1)/2)
         posInfMax<-1
         while(!sup[posInfMax]) { posInfMax<-posInfMax+1 }
@@ -176,14 +177,16 @@ profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Cus
         SupCL <- x[posSupMax-1]+(loglik_c[posSupMax-1]-(lmax-qchisq(1-alpha,1)/2))/(loglik_c[posSupMax-1]-loglik_c[posSupMax])*(x[posSupMax]-x[posSupMax-1])
         
 ######### Production du graphique
-        plot(x[posInfMin:posSupMax],loglik_c[posInfMin:posSupMax],type="l",ylab="multinomial profile loglikelihood",xlab="N",main="Profile Likelihood Confidence Interval")
-        lInf <- if (isTRUE(all.equal(InfCL,sum(Y)))) loglik_c[1] else lmax-qchisq(1-alpha,1)/2
-        segments(x0=InfCL,y0=min(loglik_c[posInfMin:posSupMax]),x1=InfCL,y1=lInf)
-        text(InfCL,min(min(loglik_c[posInfMin:posSupMax])),round(InfCL,2),pos=1,offset=0.2)
-        segments(x0=SupCL,y0=min(loglik_c[posInfMin:posSupMax]),x1=SupCL,y1=lmax-qchisq(1-alpha,1)/2)
-        text(SupCL,min(loglik_c[posInfMin:posSupMax]),round(SupCL,2),pos=1,offset=0.2)
-        segments(x0=N,y0=min(loglik_c[posInfMin:posSupMax]),x1=N,y1=lmax,lty=2)
-        text(N,min(loglik_c[posInfMin:posSupMax]),round(N,2),pos=1,offset=0.2)
+        if (verbose == TRUE) {
+          plot(x[posInfMin:posSupMax],loglik_c[posInfMin:posSupMax],type="l",ylab="multinomial profile loglikelihood",xlab="N",main="Profile Likelihood Confidence Interval")
+          lInf <- if (isTRUE(all.equal(InfCL,sum(Y)))) loglik_c[1] else lmax-qchisq(1-alpha,1)/2
+          segments(x0=InfCL,y0=min(loglik_c[posInfMin:posSupMax]),x1=InfCL,y1=lInf)
+          text(InfCL,min(min(loglik_c[posInfMin:posSupMax])),round(InfCL,2),pos=1,offset=0.2)
+          segments(x0=SupCL,y0=min(loglik_c[posInfMin:posSupMax]),x1=SupCL,y1=lmax-qchisq(1-alpha,1)/2)
+          text(SupCL,min(loglik_c[posInfMin:posSupMax]),round(SupCL,2),pos=1,offset=0.2)
+          segments(x0=N,y0=min(loglik_c[posInfMin:posSupMax]),x1=N,y1=lmax,lty=2)
+          text(N,min(loglik_c[posInfMin:posSupMax]),round(N,2),pos=1,offset=0.2)
+        }
 
 ######### Production sortie non graphique
         results<-matrix(c(N,InfCL,SupCL),nrow=1)
