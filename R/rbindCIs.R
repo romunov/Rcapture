@@ -15,7 +15,7 @@ rbindCIs <- function(x) {
   list.of.res <- lapply(x, "[[", "results")
   num.samp.units <- lapply(x, "[[", "n")
   list.of.res <- mapply(list.of.res, num.samp.units, FUN = function(x1, x2) {
-    cbind(x1, sample.size = x2)
+    cbind(x1, sampSize = x2)
   }, SIMPLIFY = FALSE)
   do.call("rbind", list.of.res)
 }
