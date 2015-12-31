@@ -1,5 +1,5 @@
 #' Merge results from profileCI function
-#
+#'
 #' To summarize results more efficients, use this function to merge them into one object.
 #'
 #' @param x List. A list of \code{closedp} objects to be merged into a single \code{matrix}.

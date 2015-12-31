@@ -2,8 +2,7 @@
 % Please edit documentation in R/rbindCIs.R
 \name{rbindCIs}
 \alias{rbindCIs}
-\title{Merge results from profileCI function
-To summarize results more efficients, use this function to merge them into one object.}
+\title{Merge results from profileCI function}
 \usage{
 rbindCIs(x)
 }
@@ -15,7 +14,6 @@ A \code{matrix} where each row represents model outputs and columns are variable
 suchs as number of individuals, intervals...
 }
 \description{
-Merge results from profileCI function
 To summarize results more efficients, use this function to merge them into one object.
 }
 \author{
