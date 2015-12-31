@@ -1,8 +1,9 @@
+#' @export
 "periodhist" <- function(X,dfreq=FALSE,vt,drop=TRUE)
 {
 
     ############################################
-    # Validation des arguments fournis en entrée
+    # Validation des arguments fournis en entr?e
     valid.one(dfreq,"logical")
     valid.vt(vt)
     Xvalid <- valid.X(X=X, dfreq=dfreq, vt=vt)

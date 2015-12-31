@@ -1,7 +1,8 @@
+#' @export
 "histpos.t" <- function(t)
 {
     #####################################################################################################################################
-    # Validation de l'argument fourni en entrée
+    # Validation de l'argument fourni en entr?e
     if (length(t)!=1||any((t %% 1)!=0)||t<=1) stop("'t' must be an integer of length 1 larger than 1")
     #####################################################################################################################################
 
@@ -14,11 +15,11 @@
     return(X0)
 }
 
-
+#' @export
 "histpos.0" <- function(vt)
 {
     #####################################################################################################################################
-    # Validation de l'argument fourni en entrée
+    # Validation de l'argument fourni en entr?e
     if (any((vt %% 1)!=0) || any(vt<=0)) stop("the 'vt' components must be positive integers")
     #####################################################################################################################################
 

@@ -1,3 +1,4 @@
+#' @export
 profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Customized model", neg=TRUE, alpha=0.05,
                       verbose = FALSE)
 {
@@ -199,7 +200,7 @@ profileCI <- function(X, dfreq=FALSE, m="M0", h="Chao", a=2, mX=NULL, mname="Cus
 
 }
 
-
+#' @export
 print.profileCI <- function(x, ...) {
         cat("\nNumber of captured units:",x$n,"\n\n")
         cat(paste((1-x$alpha)*100,"%",sep=""),"profile likelihood confidence interval:\n")

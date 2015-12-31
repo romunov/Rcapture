@@ -4,7 +4,11 @@
 #'
 #' @param x List. A list of \code{closedp} objects to be merged into a single \code{matrix}.
 #' 
+#' @return A \code{matrix} where each row represents model outputs and columns are variables,
+#' suchs as number of individuals, intervals...
+#' 
 #' @author Roman Lustrik \email{roman.lustrik@@biolitika.si}
+#' 
 #' @export
 
 rbindCIs <- function(x) {

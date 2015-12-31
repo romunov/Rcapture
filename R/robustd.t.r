@@ -1,7 +1,8 @@
+#' @export
 "robustd.t" <- function(X, dfreq=FALSE, vt, vm="M0", vh=list("Chao"), vtheta=2, neg=TRUE)
 {
 ########################################################################################
-# Validation des arguments fournis en entrée et changement de leur forme si nécessaire
+# Validation des arguments fournis en entr?e et changement de leur forme si n?cessaire
 ########################################################################################
 
         valid.one(dfreq,"logical")
@@ -15,11 +16,11 @@
         valid.one(neg,"logical")
     
 ##########################################################################################
-# AJUSTEMENT DU MODÈLE
+# AJUSTEMENT DU MOD?LE
 ##########################################################################################
 
 #-------------------------------------#
-# Élaboration et ajustement du modèle #
+# ?laboration et ajustement du mod?le #
 #-------------------------------------#
 
         Y <- histfreq.t(X,dfreq=dfreq)
@@ -39,22 +40,22 @@
         colnames(mX.) <- c(gammanames,Xw$coeffnames)
         dimX <- dim(mX.)[2]
 
-        # Ajustement du modèle
+        # Ajustement du mod?le
         anaMrd <- suppressWarnings(glm(Y~mX.,family=poisson))
 
-    #Vérification du bon ajustement du modèle loglinéaire
+    #V?rification du bon ajustement du mod?le loglin?aire
     if(!anaMrd$converged) stop("'glm' did not converge")
     if(any(is.na(anaMrd$coef))) warning("some loglinear parameter estimations cannot be evaluated")
 
 #-----------------------------------------------------------------------------------#
-# Réajustement du modèle en enlevant les gamma et les eta (si modèle Chao) négatifs #
+# R?ajustement du mod?le en enlevant les gamma et les eta (si mod?le Chao) n?gatifs #
 #-----------------------------------------------------------------------------------#
 
         param<-anaMrd$coef
         ppositions <- 0
         if (neg)
         {
-            # Vecteur d'indicatrices pour les paramètres d'intérêt négatifs
+            # Vecteur d'indicatrices pour les param?tres d'int?r?t n?gatifs
             indic <- as.vector(c(0,ifelse(param[2:(2*I-1)]<0,1,0)))
             for (i in 1:I)
             {
@@ -65,20 +66,20 @@
                     indic <- as.vector(c(indic,rep(0,Xw$nbcoeff[i])))
                 }
             }
-            while(sum(na.rm=TRUE,indic)>0) # Répéter la boucle jusqu'à ce qu'aucun gamma approprié ne soit négatif
+            while(sum(na.rm=TRUE,indic)>0) # R?p?ter la boucle jusqu'? ce qu'aucun gamma appropri? ne soit n?gatif
             {
-                # Détermination de la position du premier gamma approprié négatif
+                # D?termination de la position du premier gamma appropri? n?gatif
                 pos <- 1
                 while(indic[pos]==0) pos <- pos + 1
                 ppositions <- c(ppositions,pos)
-                # Retrait de la bonne colonne de mX. et réajustement du modèle
+                # Retrait de la bonne colonne de mX. et r?ajustement du mod?le
                 mX. <- mX.[,-(pos-sum(na.rm=TRUE,ppositions<pos))]
                 anaMrd <- suppressWarnings(glm(Y~mX.,family=poisson))
-                # Ajout de zéros dans le vecteur des paramètres loglinéaires
+                # Ajout de z?ros dans le vecteur des param?tres loglin?aires
                 positions <- sort(ppositions[-1])                
                 param <- rep(0,dimX+1)
                 param[-positions] <- anaMrd$coef 
-                # Vecteur d'indicatrices pour les paramètres d'intérêt négatifs
+                # Vecteur d'indicatrices pour les param?tres d'int?r?t n?gatifs
                 indic <- as.vector(c(0,ifelse(param[2:(2*I-1)]<0,1,0)))
                 for (i in 1:I)
                 {
@@ -94,7 +95,7 @@
         positions <- sort(ppositions[-1]) 
 
 #------------------------------------------------------------------------#
-# Ajustement d'un modèle pour tester la présence d'émigration temporaire #
+# Ajustement d'un mod?le pour tester la pr?sence d'?migration temporaire #
 #------------------------------------------------------------------------#
 
         Inono <- length(vm[vm!="none"])
@@ -126,7 +127,7 @@
         }
      
 #---------------------------------------#
-# Formation des vecteurs des paramètres #
+# Formation des vecteurs des param?tres #
 #---------------------------------------#
 
         # valeur de l intercept
@@ -147,7 +148,7 @@
         }
 
 
-        # Vérification de la présence de paramètres gamma négatifs si l'option "neg"=FALSE
+        # V?rification de la pr?sence de param?tres gamma n?gatifs si l'option "neg"=FALSE
         if(!neg)
         {
             if (any(Alpha<0)) warning("one or more gamma parameters are negative,\n",
@@ -155,7 +156,7 @@
         }
 
 #--------------------------------------------------------------#
-# Matrice de variances-covariances des paramètres loglinéaires #
+# Matrice de variances-covariances des param?tres loglin?aires #
 #--------------------------------------------------------------#
 
         if(length(positions)>0) {
@@ -164,7 +165,7 @@
         } else varcov <- summary(anaMrd)$cov.unscaled  
 
 ########################################################################################
-# Estimation des paramètres démographiques
+# Estimation des param?tres d?mographiques
 ########################################################################################
 
 #--------------------------------------------#
@@ -186,7 +187,7 @@
                         pstar[i] <- 1-prod((1+exp(beta[c(1:vt[i])]))^-1)
                         dpstar[(2*I + if(i>1) sum(na.rm=TRUE,Xw$nbcoeff[1:(i-1)]) else 0):(2*I-1+sum(na.rm=TRUE,Xw$nbcoeff[1:i])),i] <- prod((1+exp(beta[c(1:vt[i])]))^-1)*exp(beta[c(1:vt[i])])/(1+exp(beta[c(1:vt[i])]))
                         beta <- beta[-c(1:vt[i])]
-                } else # Tous les autres modèles
+                } else # Tous les autres mod?les
                 {
                         Xpf <- Xclosedp(vt[i],vm[i],vh[[i]],vtheta[i])
                         pstar[i] <- sum(na.rm=TRUE,exp(Xpf$mat%*%beta[c(1:Xpf$nbcoeff)]))/(1+ sum(na.rm=TRUE,exp(Xpf$mat%*%beta[c(1:Xpf$nbcoeff)])))
@@ -303,7 +304,7 @@
         BStderr <- sqrt(diag(varcovB))
           
 #--------------------------------------------------------------------#
-# Calcul du nombre total d'individus qui ont passé sur le territoire #
+# Calcul du nombre total d'individus qui ont pass? sur le territoire #
 #--------------------------------------------------------------------#
 
         Ntot <- Npop[1]+sum(na.rm=TRUE,B)
@@ -311,7 +312,7 @@
         NtotStderr <- sqrt(max(t(dNtot)%*%varcov%*%dNtot-Ntot,0))
 
 #######################################################################################
-# Présentation des résultats
+# Pr?sentation des r?sultats
 #######################################################################################
 
         modelfit <- matrix(c(anaMrd$deviance,anaMrd$df.residual,anaMrd$aic),nrow=1)
@@ -354,7 +355,7 @@
         models<-matrix(Xw$models,nrow=1)
         dimnames(models) <- list("model",titre.periode)
 
-        # Matrice de variances-covariances des paramèters pstar, phi, Npop, B et Ntot
+        # Matrice de variances-covariances des param?ters pstar, phi, Npop, B et Ntot
         dP <- cbind(dpstar,dphi,dNpop,dB,dNtot)
         covP <- t(dP)%*%varcov%*%dP
         titre.P <- c(rep(0,4*I-2),"Ntot")
@@ -376,7 +377,7 @@
         ans                
 }
 
-
+#' @export
 print.robustd <- function(x, ...){
         test <- rep(x$models[1],length(x$models))
         if(all(test==as.character(x$models)))
@@ -411,8 +412,8 @@ print.robustd <- function(x, ...){
         print.default(x$Ntot, print.gap = 2, quote = FALSE, right=TRUE, na.print="--", ...)
         cat("\nTotal number of captured units:",x$n,"\n")
         ###################################################
-        ### 22 mai 2012 : On a décidé de ne plus imprimer ces notes car l'utilisateur ne comprend pas quel
-        ### impact des parametres eta fixés à zéro ont sur ses résultats. Ça l'embête plus qu'autre chose.
+        ### 22 mai 2012 : On a d?cid? de ne plus imprimer ces notes car l'utilisateur ne comprend pas quel
+        ### impact des parametres eta fix?s ? z?ro ont sur ses r?sultats. ?a l'emb?te plus qu'autre chose.
         #if (length(x$neg[x$neg<2*dim(x$N)[1]])==1) cat("\nNote:",length(x$neg[x$neg<2*dim(x$N)[1]]),"gamma parameter has been set to zero\n")
         #if (length(x$neg[x$neg<2*dim(x$N)[1]])>1) cat("\nNote:",length(x$neg[x$neg<2*dim(x$N)[1]]),"gamma parameters have been set to zero\n")
         #if (length(x$neg[x$neg>=2*dim(x$N)[1]])==1) cat("\nNote:",length(x$neg[x$neg>=2*dim(x$N)[1]]),"eta parameter has been set to zero\n")

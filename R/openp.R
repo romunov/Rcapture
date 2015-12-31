@@ -1,7 +1,8 @@
+#' @export
 "openp" <- function(X,dfreq=FALSE,m=c("up","ep"),neg=TRUE,keep=rep(TRUE,2^I-1))
 {
 ############################################################################################################################################
-# Validation des arguments fournis en entrée
+# Validation des arguments fournis en entr?e
 ############################################################################################################################################
 
         valid.one(dfreq,"logical")
@@ -15,11 +16,11 @@
 
 
 ############################################################################################################################################
-# AJUSTEMENT DU MODÈLE
+# AJUSTEMENT DU MOD?LE
 ############################################################################################################################################
 
 #-------------------------------------#
-# Élaboration et ajustement du modèle #
+# ?laboration et ajustement du mod?le #
 #-------------------------------------#
 
         Ycomplete <- histfreq.t(X,dfreq=dfreq)   # construction du vecteur nu delta des frequences de captures par periodes
@@ -39,42 +40,42 @@
         mX. <- cbind(Zd,Xd)      # on fusionne ces 2 composantes explicatives
 
 
-        # Ajustement du modèle
+        # Ajustement du mod?le
         anaMpo <- suppressWarnings(glm(Y~mX.,family=poisson,na.action=na.omit))
 
 
-        #Vérification du bon ajustement du modèle loglinéaire
+        #V?rification du bon ajustement du mod?le loglin?aire
         if(!anaMpo$converged) stop("'glm' did not converge")
         if(any(is.na(anaMpo$coef))) warning("the design matrix is not of full rank; some loglinear parameter estimations cannot be evaluated")
 
 
 #-------------------------------------------------------#
-# Réajustement du modèle en enlevant les gamma négatifs #
+# R?ajustement du mod?le en enlevant les gamma n?gatifs #
 #-------------------------------------------------------#
 
-# Particularité pour m='up' : 
-# Les paramètres gamma1, gammaI-1 et gammaI ne sont pas estimables. On ne teste donc pas leur positivité.
-# Ainsi, pour I>3, on vérifie seulement les paramètres gamma 2 à I-2 et I+1 à 2I-2.
+# Particularit? pour m='up' : 
+# Les param?tres gamma1, gammaI-1 et gammaI ne sont pas estimables. On ne teste donc pas leur positivit?.
+# Ainsi, pour I>3, on v?rifie seulement les param?tres gamma 2 ? I-2 et I+1 ? 2I-2.
 
         param<-anaMpo$coef
         ppositions <- 0
         test <- if(m=="up") neg && I > 2 else neg  
         if (test)
         {
-            # Vecteur d'indicatrices pour les paramètres d'intérêt négatifs
+            # Vecteur d'indicatrices pour les param?tres d'int?r?t n?gatifs
             if (m=="up") {
                 indic <- if(I==3) as.vector(c(rep(0,4),ifelse(param[5]<0,1,0),rep(0,I-2))) else as.vector(c(0,0,ifelse(param[3:(I-1)]<0,1,0),0,0,ifelse(param[(I+2):(2*I-1)]<0,1,0),rep(0,I-2)))
             } else indic <- as.vector(c(0,ifelse(param[2:(2*I-1)]<0,1,0),0))
-            while(sum(na.rm=TRUE,indic)>0) # Répéter la boucle jusqu'à ce qu'aucun gamma approprié ne soit négatif
+            while(sum(na.rm=TRUE,indic)>0) # R?p?ter la boucle jusqu'? ce qu'aucun gamma appropri? ne soit n?gatif
             {
-                # Détermination de la position du premier gamma approprié négatif
+                # D?termination de la position du premier gamma appropri? n?gatif
                 pos <- 1
                 while(indic[pos]==0) pos <- pos + 1
                 ppositions <- c(ppositions,pos)
-                # Retrait de la bonne colonne de mX. et réajustement du modèle
+                # Retrait de la bonne colonne de mX. et r?ajustement du mod?le
                 mX. <- mX.[,-(pos-sum(na.rm=TRUE,ppositions<pos))]
                 anaMpo <- suppressWarnings(glm(Y~mX.,family=poisson,na.action=na.omit))        
-                # Ajout de zéros dans le vecteur des paramètres loglinéaires
+                # Ajout de z?ros dans le vecteur des param?tres loglin?aires
                 positions <- sort(ppositions[-1])                
                 param <- c(anaMpo$coef[1:(positions[1]-1)],0)
                 if(length(positions)>1)
@@ -89,7 +90,7 @@
                     }
                 }
                 param <- c(param,anaMpo$coef[(positions[length(positions)]-length(positions)+1):length(anaMpo$coef)])
-                # Vecteur d'indicatrices pour les paramètres d'intérêt négatifs
+                # Vecteur d'indicatrices pour les param?tres d'int?r?t n?gatifs
                 if (m=="up") {
                     indic <- if(I==3) as.vector(c(rep(0,4),ifelse(param[5]<0,1,0),rep(0,I-2))) else as.vector(c(0,0,ifelse(param[3:(I-1)]<0,1,0),0,0,ifelse(param[(I+2):(2*I-1)]<0,1,0),rep(0,I-2)))
                 } else indic <- as.vector(c(0,ifelse(param[2:(2*I-1)]<0,1,0),0))
@@ -99,10 +100,10 @@
 
 
 #------------------------------------------------------#
-# Ajustement d'un modèle pour tester l'effet de trappe #
+# Ajustement d'un mod?le pour tester l'effet de trappe #
 #------------------------------------------------------#
 
-        # Effet de trappe homogène
+        # Effet de trappe homog?ne
         if(I==2)              ## inutile stop si I <=2
         {                     ## inutile stop si I <=2
             anaMpo2 <- NULL   ## inutile stop si I <=2
@@ -120,7 +121,7 @@
         }                     ## inutile stop si I <=2 
 
 
-        # Effet de trappe hétérogène
+        # Effet de trappe h?t?rog?ne
         if (m=="up")
         {
             if(I==2||I==3||I==4)
@@ -149,7 +150,7 @@
 
 
 #---------------------------------------#
-# Formation des vecteurs des paramètres #
+# Formation des vecteurs des param?tres #
 #---------------------------------------#
 
         # valeur de l intercept
@@ -167,7 +168,7 @@
         } else Beta <- param[2*I]
 
 
-        # Vérification de la présence de paramètres gamma négatifs si l'option "neg"=FALSE
+        # V?rification de la pr?sence de param?tres gamma n?gatifs si l'option "neg"=FALSE
         if(!neg)
         {
             if (m=="ep"&&any(Alpha<0)) 
@@ -185,10 +186,10 @@
 
 
 #--------------------------------------------------------------#
-# Matrice de variances-covariances des paramètres loglinéaires #
+# Matrice de variances-covariances des param?tres loglin?aires #
 #--------------------------------------------------------------#
 
-        # Afin de déterminer la position des des paramètres non estimables
+        # Afin de d?terminer la position des des param?tres non estimables
         NAindic <- as.vector(is.na(param))
         NApos <- 0
         pos <- 1
@@ -201,11 +202,11 @@
         NApos <- NApos[-1]       
         
         
-        # Pour insérer des lignes et colonnes de zéros pour les paramètres fixés à zéro et pour les paramètres non estimables
+        # Pour ins?rer des lignes et colonnes de z?ros pour les param?tres fix?s ? z?ro et pour les param?tres non estimables
         covpos <- sort(c(positions,NApos))
         if(length(covpos)>0)
         {
-            # Insertion de colonnes de zéros
+            # Insertion de colonnes de z?ros
             varcovc <-  if(covpos[1]==1) rep(0,dim(summary(anaMpo)$cov.unscaled)[1]) else cbind(summary(anaMpo)$cov.unscaled[,1:(covpos[1]-1)],rep(0,dim(summary(anaMpo)$cov.unscaled)[1]))
             if(length(covpos)>1)
             {
@@ -219,7 +220,7 @@
                 }
             }
             if(covpos[length(covpos)]<length(param)) varcovc <- cbind(varcovc,summary(anaMpo)$cov.unscaled[,(covpos[length(covpos)]-length(covpos)+1):dim(summary(anaMpo)$cov.unscaled)[2]])
-            # Insertion de lignes de zéros
+            # Insertion de lignes de z?ros
             varcov <- if(covpos[1]==1) rep(0,dim(varcovc)[2]) else rbind(varcovc[1:(covpos[1]-1),],rep(0,dim(varcovc)[2]))
             if(length(covpos)>1)
             {
@@ -238,7 +239,7 @@
 
 
 ############################################################################################################################################
-# Estimation des paramètres démographiques
+# Estimation des param?tres d?mographiques
 ############################################################################################################################################
 
 #--------------------------------------------#
@@ -370,7 +371,7 @@
         NpopStderr <- sqrt(diag(varcovtpop))    
         NpopStderr <- sqrt(pmax(NpopStderr^2-Npop,0))
 
-        # Correction si certains historiques ont été enlevés (avec l'option keep)
+        # Correction si certains historiques ont ?t? enlev?s (avec l'option keep)
         corrkeep <- suppressWarnings(sum(na.rm=TRUE,Ycomplete[!keep]-predict(anaMpo,newdata=data.frame(mX.),type="response")[!keep]))
         Npop <- Npop + corrkeep
 
@@ -386,16 +387,16 @@
   
         
 #--------------------------------------------------------------------#
-# Calcul du nombre total d'individus qui ont passé sur le territoire #
+# Calcul du nombre total d'individus qui ont pass? sur le territoire #
 #--------------------------------------------------------------------#
 
         if (m=="up")
         {
-            #Programme pour former la matrice X avec des colonnes de zéros pour les paramètres fixés à zéro
+            #Programme pour former la matrice X avec des colonnes de z?ros pour les param?tres fix?s ? z?ro
             Xtemp<-cbind(rep(1,dim(mX.)[1]),mX.)        
             if(length(positions)>0)
             {
-                # Insertion de colonnes de zéros
+                # Insertion de colonnes de z?ros
                 X <- cbind(Xtemp[,1:(positions[1]-1)],rep(0,dim(Xtemp)[1]))
                 if(length(positions)>1)
                 {
@@ -413,7 +414,7 @@
             } else { X <- Xtemp}
     
     
-            # Calcul du nombre total d'individus qui ont passé sur le territoire
+            # Calcul du nombre total d'individus qui ont pass? sur le territoire
             if (I==2)
             {
                 Ntot <- sum(na.rm=TRUE,Ycomplete)
@@ -451,7 +452,7 @@
 
 
 ############################################################################################################################################
-# Présentation des résultats
+# Pr?sentation des r?sultats
 ############################################################################################################################################
         
         modelfit <- matrix(c(anaMpo$deviance,anaMpo$df.residual,anaMpo$aic),nrow=1)
@@ -488,7 +489,7 @@
         dimnames(uv) <- list(titre.i,c("estimate","stderr"))
         dimnames(vv) <- list(titre.i,c("estimate","stderr"))
 
-        #Paramètres non estimables
+        #Param?tres non estimables
         if (m=="up")
         {
             pstar[1,] <- rep(NA,2)
@@ -500,7 +501,7 @@
             B[I-1,] <- rep(NA,2)
         }
 
-        # Matrice de variances-covariances des paramèters pstar, phi, Npop, B et Ntot
+        # Matrice de variances-covariances des param?ters pstar, phi, Npop, B et Ntot
         dP <- cbind(dpstar,dphi,dNpop,dB,dNtot)
         covP <- t(dP)%*%varcov%*%dP
         titre.P <- c(rep(0,4*I-2),"Ntot")
@@ -523,7 +524,7 @@
 
 }
 
-
+#' @export
 print.openp <- function(x, ...){
 
         cat("\nModel fit:\n")
@@ -551,8 +552,8 @@ print.openp <- function(x, ...){
         print.default(x$Ntot, print.gap = 2, quote = FALSE, right=TRUE, na.print="--", ...)
         cat("\nTotal number of captured units:",x$n,"\n")
         ###################################################
-        ### 22 mai 2012 : On a décidé de ne plus imprimer ces notes car l'utilisateur ne comprend pas quel
-        ### impact des parametres eta fixés à zéro ont sur ses résultats. Ça l'embête plus qu'autre chose.
+        ### 22 mai 2012 : On a d?cid? de ne plus imprimer ces notes car l'utilisateur ne comprend pas quel
+        ### impact des parametres eta fix?s ? z?ro ont sur ses r?sultats. ?a l'emb?te plus qu'autre chose.
         #if (length(x$neg[x$neg<2*dim(x$N)[1]])==1) cat("\nNote:",length(x$neg[x$neg<2*dim(x$N)[1]]),"gamma parameter has been set to zero\n")
         #if (length(x$neg[x$neg<2*dim(x$N)[1]])>1) cat("\nNote:",length(x$neg[x$neg<2*dim(x$N)[1]]),"gamma parameters has been set to zero\n")
         ###################################################
@@ -560,6 +561,7 @@ print.openp <- function(x, ...){
         invisible(x)
 }
 
+#' @export
 plot.openp <- function(x,main="Scatterplot of Pearson Residuals", ...){
     res <- (x$glm$model[,1]- fitted.values(x$glm))/sqrt(fitted.values(x$glm))
     if (length(x$glm$na.action)==0) 

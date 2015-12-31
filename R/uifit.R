@@ -1,19 +1,20 @@
+#' @export
 uifit <- function(x.closedp)
 {
 
     ############################################################################################################################
-    # Validation de l'argument fourni en entrée
+    # Validation de l'argument fourni en entr?e
     if(!any(class(x.closedp)=="closedp.t")) stop("'x.closedp' must be an object produced with 'closedp' or 'closedp.t")
     ############################################################################################################################
-    # Ma fonction fonctionne correctement car les éléments glm et parameter de l'objet de type closedp
-    # contiennent des sorties pour les mêmes modèles, et ce, dans le même ordre.
+    # Ma fonction fonctionne correctement car les ?l?ments glm et parameter de l'objet de type closedp
+    # contiennent des sorties pour les m?mes mod?les, et ce, dans le m?me ordre.
 
         t <- x.closedp$t
 
         ifirstcap <- NULL
         for (i in 1:t) { ifirstcap <- c(ifirstcap,rep(i,2^(t-i))) }
 
-        # Identification des modèles qui ont été ajustés
+        # Identification des mod?les qui ont ?t? ajust?s
         lmn<-rownames(x.closedp$results)
         nm<-length(lmn)
 
@@ -23,11 +24,11 @@ uifit <- function(x.closedp)
         stat <- matrix(nrow=nm,ncol=1)
         dimnames(stat) <- list(lmn,c("Chi-suare value"))
 
-        # Valeurs observées
+        # Valeurs observ?es
         desc<- descriptive(x.closedp$X,x.closedp$dfreq)
         tableau[,1]<-c(desc$base.freq[,2],rep(NA,5))
 
-    # Boucle qui traite tous les modèles
+    # Boucle qui traite tous les mod?les
     for (j in 1:nm)
     {
         glmo <- x.closedp$glm[[j]]
@@ -83,7 +84,7 @@ uifit <- function(x.closedp)
 
     }
 
-    # Statistiques sur le jour de la première capture
+    # Statistiques sur le jour de la premi?re capture
     Mean <- colSums((1:t)*tableau[1:t,])/colSums(tableau[1:t,])
     Variance <- colSums(((1:t)^2)*tableau[1:t,])/colSums(tableau[1:t,]) - Mean^2
     firstcapt <- cbind(Mean,Variance)

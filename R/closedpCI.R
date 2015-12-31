@@ -1,3 +1,4 @@
+#' @export
 closedpCI.t <- function(X, dfreq=FALSE, m=c("M0","Mt","Mh","Mth"), mX=NULL, 
     h=NULL, h.control=list(), mname=NULL, alpha=0.05, fmaxSupCL=3, ...)
 {
@@ -6,6 +7,7 @@ closedpCI.t <- function(X, dfreq=FALSE, m=c("M0","Mt","Mh","Mth"), mX=NULL,
       alpha=alpha, fmaxSupCL=fmaxSupCL, call=call, ...)  
 }
 
+#' @export
 closedpCI.0 <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=NULL, m=c("M0","Mh"), 
     mX=NULL, h=NULL, h.control=list(), mname=NULL, alpha=0.05, fmaxSupCL=3, ...)
 {
@@ -14,26 +16,27 @@ closedpCI.0 <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=NULL
       h.control=h.control, mname=mname, alpha=alpha, fmaxSupCL=fmaxSupCL, call=call, ...)  
 }
 
+
 closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m="M0", 
                                mX=NULL, h=NULL, h.control=list(), mname=NULL, alpha=0.05, 
                                fmaxSupCL=3, call, ...)
 {  
-  ### Initialisation préliminaire de variables
+  ### Initialisation pr?liminaire de variables
   typet <- substr(paste(call[1]), nchar(paste(call[1])), nchar(paste(call[1]))) == "t"
   tinf <- if(is.null(t)) FALSE else is.infinite(t)
   
-  ######### Validation des arguments en entrée et initialisation de variables #########
+  ######### Validation des arguments en entr?e et initialisation de variables #########
   
-  ### Arguments pour l'entrée des données :  X, dfreq, dtype, t
+  ### Arguments pour l'entr?e des donn?es :  X, dfreq, dtype, t
   valid.one(dfreq,"logical")
   valid.dtype(dtype)
   valid.t(t=t, pInf=!typet)
   Xvalid <- valid.X(X=X, dfreq=dfreq, dtype=dtype, t=t, warn=typet)
   X <- Xvalid$X
-  t <- Xvalid$t  ## t est modifié s'il prennait la valeur NULL ou Inf
+  t <- Xvalid$t  ## t est modifi? s'il prennait la valeur NULL ou Inf
   
   ### Argument t0
-  t0 <- valid.t0(t0=t0, typet=typet, t=t, tinf=tinf) # doit être soumis après valid.X qui modifie t
+  t0 <- valid.t0(t0=t0, typet=typet, t=t, tinf=tinf) # doit ?tre soumis apr?s valid.X qui modifie t
   
   ### Arguments m et mX
   mX <- valid.mX(mX=mX, typet=typet, t=t, t0=t0)  
@@ -45,7 +48,7 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
       warning("the argument (m = ", call[["m"]], ") was not used since an argument 'mX' was given")
   }
   
-  ### Arguments pour spécifier l'hétérogénéité
+  ### Arguments pour sp?cifier l'h?t?rog?n?it?
   valid.h.out <- valid.h(h=h, values=c("Chao","LB","Poisson","Darroch","Gamma","Normal"), 
                          m=m, call=call)
   h <- valid.h.out$h
@@ -66,31 +69,31 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
   valid.fmaxSupCL(fmaxSupCL)  
   
   
-  #########  Création de variables pour l'ajustement du modèle  ######### 
+  #########  Cr?ation de variables pour l'ajustement du mod?le  ######### 
   
-  ### Création du vecteur de variable réponse Y
+  ### Cr?ation du vecteur de variable r?ponse Y
   getY.out <- getY(typet=typet, X=X, dfreq=dfreq, dtype=dtype, t=t, t0=t0) 
   Y <- getY.out$Y
   n <- getY.out$n 
   
-  ### Création de la matrice X
+  ### Cr?ation de la matrice X
   getmX.out <- getmX(typet=typet, t=t, t0=t0, m=m, h=h, theta=theta, mX=mX)
   mX. <- getmX.out$mX. 
   nbcap <- getmX.out$nbcap
   nca <- getmX.out$nca
   nparams <- if (htype == "Normal") ncol(mX.) + 2 else ncol(mX.) + 1
   
-  ### Création de la variable offset
+  ### Cr?ation de la variable offset
   cst <- getcst(typet=typet, tinf=tinf, t=t, t0=t0, nbcap=nbcap)  
   
   
-  #########  Dernière validation (placée ici car dépendante de mX.)  ######### 
+  #########  Derni?re validation (plac?e ici car d?pendante de mX.)  ######### 
     
   ### Validation de l'argument h.control$initcoef
-  ### (pas de fonction interne car utilisé seulement ici)
+  ### (pas de fonction interne car utilis? seulement ici)
   if (htype == "Normal") {
     initcoef <- h.control$initcoef
-    # Valeur par défaut pas ici car demande l'ajustement d'un modèle.
+    # Valeur par d?faut pas ici car demande l'ajustement d'un mod?le.
     # On la retrouve donc plus loin dans le code.
     if(!is.null(initcoef)) {
       if(length(initcoef)!=ncol(mX.)+1) stop("'initcoef' must be of length 'ncol(mX)+1'")
@@ -103,17 +106,17 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
   
   # -------------------------------------------------------------------------------------- #
   
-  ######### Ajustement du modèle #########
+  ######### Ajustement du mod?le #########
   
   # On appelle ici la fonction closedp.t.fitone, qui retourne 
-  # le tableau des résultats et les détails de l'ajustement du modèle
-  # (liste avec les éléments resultsFit, fit, fit.warn, fit.err
-  #  et neg.eta si modèle Chao )
+  # le tableau des r?sultats et les d?tails de l'ajustement du mod?le
+  # (liste avec les ?l?ments resultsFit, fit, fit.warn, fit.err
+  #  et neg.eta si mod?le Chao )
   fit.out <- closedp.fitone(n = n, Y = Y, mX. = mX., nbcap = nbcap, nca = nca, cst = cst, 
                             htype = htype, neg = neg, initcoef = initcoef, 
                             initsig = initsig, method = method, ...)
   
-  # On arrête la fonction si l'ajustement n'a pas fonctionné
+  # On arr?te la fonction si l'ajustement n'a pas fonctionn?
   if (!is.null(fit.out$fit.err)) {
     if (grepl("larger than the number of observations", fit.out$fit.err, fixed = TRUE)) {
       if (!typet && (t0 < t) && (ncol(mX.) + 1 <= t))
@@ -131,7 +134,7 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
   # Trace des avertissements : 
   fit.warn <- fit.out$fit.warn  
   # Ajout d'une note si moins de lignes que
-  # de colonnes dans la matrice X à cause d'un t0 trop petit
+  # de colonnes dans la matrice X ? cause d'un t0 trop petit
   if (!is.null(fit.warn)) {
     idFRTC <- grepl("fewer rows than columns", fit.warn, fixed = TRUE)
     if (any(idFRTC)) {
@@ -147,7 +150,7 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
     fit.warn <- c(fit.warn, getBiasWarn(N = resultsN["abundance"], bias = bias))
   }
   
-  # On construit le tableau de résultats
+  # On construit le tableau de r?sultats
   infoFit <- getInfo(err = NULL, warn = fit.warn)
   results <- matrix(c(resultsN, fit.out$resultsFit[-1], infoFit), nrow = 1)
   rownames(results) <- mname
@@ -167,13 +170,13 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
     InfCL <- n + (N-n)/C
     SupCL <- n + (N-n)*C
     
-    # Ajout au tableau des résultats
+    # Ajout au tableau des r?sultats
     ajoutresults <- matrix(c(InfCL,SupCL),nrow=1)
     colnames(ajoutresults) <- c("infCL","supCL")
     results <- cbind(results[, 1:2, drop = FALSE], ajoutresults, 
                      results[, -(1:2), drop = FALSE])
     
-  } else { ## Si on n'a pas demandé un modèle hétérogène normal :    
+  } else { ## Si on n'a pas demand? un mod?le h?t?rog?ne normal :    
     
     Nval <- loglikval <- CI.err <- CI.warn <- NULL
     
@@ -191,7 +194,7 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
       mXavec <- rbind(mX.,rep(0,ncol(mX.)),deparse.level=0)
       cstavec <- c(cst,0)
       
-      ######### Fonction de calcul de la log vraisemblance multinomiale profile à optimiser.
+      ######### Fonction de calcul de la log vraisemblance multinomiale profile ? optimiser.
       loglikemult <- function(N,lobj=0)
       {
         n0 <- as.vector(N-n)
@@ -217,33 +220,33 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
         return(loglik)                
       }
       
-      ######### Détermination du maximum
+      ######### D?termination du maximum
       op.out <- tryCatch.W.E(optimize(loglikemult, c(n, 1.5*N), tol = 0.0001, maximum=TRUE))
-      # En théorie N (N Poisson) > Nmax (N multinomial), on pourrait donc faire la 
-      # recherche sur l'intervalle (n, N). Mais si N est très proche de Nmax, 
-      # ça pourrait peut-être causer des problèmes.
-      # On prend donc l'intervalle de recherche (n, 1.5*N) qui contient assurément le maximum.
+      # En th?orie N (N Poisson) > Nmax (N multinomial), on pourrait donc faire la 
+      # recherche sur l'intervalle (n, N). Mais si N est tr?s proche de Nmax, 
+      # ?a pourrait peut-?tre causer des probl?mes.
+      # On prend donc l'intervalle de recherche (n, 1.5*N) qui contient assur?ment le maximum.
   
-      # trace des warnings conservée
+      # trace des warnings conserv?e
       if(!is.null(op.out$warnings))
         CI.warn <- c(CI.warn, paste("warning while calculating the abundance multinomial estimation:", 
                                     op.out$warnings))
       
-      # Si la commande a généré une erreur
+      # Si la commande a g?n?r? une erreur
       if (inherits(op.out$value, "erreur")) {
         
         CI.err <- c(CI.err, op.out$value$message)     
         CI <- matrix(c(NA, NA, NA, -1), nrow = 1) 
         Nval <- loglikval <- NA
         
-      # Si la commande n'a pas généré une erreur
+      # Si la commande n'a pas g?n?r? une erreur
       } else {
   
         Nmax <- op.out$value$maximum
         lmax <- op.out$value$objective
         lminCI <- lmax-qchisq(1-alpha,1)/2
       
-        ######### Détermination de la borne inférieure
+        ######### D?termination de la borne inf?rieure
         infroot <- tryCatch.W.E(uniroot(loglikemult, c(n, Nmax), lobj=lminCI, tol = 0.0001))
         if(inherits(infroot$value, "erreur")) {
           InfCL <- n
@@ -265,7 +268,7 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
           Nval <- Nval[posKeep]
         }
       
-        ######### Détermination de la borne supérieure
+        ######### D?termination de la borne sup?rieure
         suproot <- tryCatch.W.E(uniroot(loglikemult, c(Nmax, fmaxSupCL*N), lobj=lminCI, tol = 0.0001))
         if(inherits(suproot$value, "erreur")) {
           SupCL <- paste0(">",round(fmaxSupCL*N,1))
@@ -288,7 +291,7 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
           Nval <- Nval[posKeep]
         }
       
-        ######### Préparation des éléments en sortie pour l'IC profile
+        ######### Pr?paration des ?l?ments en sortie pour l'IC profile
         loglikval <- loglikval[order(Nval)]
         Nval <- Nval[order(Nval)]    
         infoCI <- getInfo(err = NULL, warn = CI.warn)
@@ -308,7 +311,7 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
   
   # -------------------------------------------------------------------------------------- #
   
-  ######### Sortie des résultats #########
+  ######### Sortie des r?sultats #########
   
   ans <- list(n = n, t = t, t0 = t0, results = results)
   if (typet) ans$t0 <- NULL
@@ -329,8 +332,9 @@ closedpCI.internal <- function(X, dfreq=FALSE, dtype="hist", t=NULL, t0=NULL, m=
 
 
 #--------------------------------------------------------------------------------------------------#
-##### Méthodes pour objets de type closedpCI ####
+##### M?thodes pour objets de type closedpCI ####
 
+#' @export
 print.closedpCI <- function(x, ...) {
   cat("\nNumber of captured units:",x$n,"\n\n")  
   if (is.null(x$N.CI)) {
@@ -340,8 +344,8 @@ print.closedpCI <- function(x, ...) {
     cat("Poisson estimation and model fit:\n")
     tabprint(tab = x$results, digits = c(1,1,3,0,3,3,NA), warn = x$fit.warn, ...)
     ###################################################
-    ### 22 mai 2012 : On a décidé de ne plus imprimer ces notes car l'utilisateur ne comprend pas quel
-    ### impact des parametres eta fixés à zéro ont sur ses résultats. Ça l'embête plus qu'autre chose.
+    ### 22 mai 2012 : On a d?cid? de ne plus imprimer ces notes car l'utilisateur ne comprend pas quel
+    ### impact des parametres eta fix?s ? z?ro ont sur ses r?sultats. ?a l'emb?te plus qu'autre chose.
     #if (length(x$neg.eta)==1) cat("\nNote:",length(x$neg.eta),"eta parameter has been set to zero\n")
     #if (length(x$neg.eta)>1) cat("\nNote:",length(x$neg.eta),"eta parameters has been set to zero\n")
     ###################################################
@@ -355,9 +359,10 @@ print.closedpCI <- function(x, ...) {
   invisible(x)
 }
 
+#' @export
 plotCI <- function(x.closedpCI, main = "Profile Likelihood Confidence Interval", ...) {
 ##############################################################################################
-  # Validation de l'argument fourni en entrée
+  # Validation de l'argument fourni en entr?e
   if(!any(class(x.closedpCI)=="closedpCI")) 
     stop("'x.closedpCI' must be an object produced with 'closedpCI.t' or 'closedpCI.0")
 ##############################################################################################
@@ -385,10 +390,12 @@ plotCI <- function(x.closedpCI, main = "Profile Likelihood Confidence Interval",
   }
 }
 
+#' @export
 boxplot.closedpCI <- function(x,main="Boxplots of Pearson Residuals", ...) {
   boxplot.default((x$fit$y-x$fit$fitted.values)/sqrt(x$fit$fitted.values), main=main, ...)     
 }
 
+#' @export
 plot.closedpCI <- function(x,main="Scatterplot of Pearson Residuals", ...){
   typet <- if(any(class(x)=="closedpCI.t")) TRUE else FALSE
   t <- if (typet) x$t else x$t0

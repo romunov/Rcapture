@@ -1,9 +1,10 @@
+#' @export
 closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
     m=c("M0","Mt","Mh","Mth","Mb","Mbh"), h=NULL, h.control=list(), ...)
 {
   call <- match.call()
   
-  ######### Validation des arguments en entrée et initialisations #########
+  ######### Validation des arguments en entr?e et initialisations #########
   
   valid.one(dfreq,"logical")
   dtype <- dtype[1]
@@ -11,10 +12,10 @@ closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
   valid.t(t=t, pInf=FALSE)
   Xvalid <- valid.X(X=X, dfreq=dfreq, dtype=dtype, t=t)
     X <- Xvalid$X
-    t <- Xvalid$t  ## t est modifié s'il prennait la valeur NULL ou Inf
+    t <- Xvalid$t  ## t est modifi? s'il prennait la valeur NULL ou Inf
   m <- valid.vm(vm=m, values=c("M0","Mt","Mh","Mth","Mb","Mbh"), vt=t, typet=TRUE)
-  typet <- if(m %in% c("M0", "Mh")) FALSE else TRUE  ## si VRAI, alors t0 n'est pas utilisé   
-  t0 <- valid.t0(t0=t0, typet=typet, t=t) ## doit être soumis après valid.X qui modifie t
+  typet <- if(m %in% c("M0", "Mh")) FALSE else TRUE  ## si VRAI, alors t0 n'est pas utilis?   
+  t0 <- valid.t0(t0=t0, typet=typet, t=t) ## doit ?tre soumis apr?s valid.X qui modifie t
   valid.h.out <- valid.h(h=h, values=c("Chao","LB","Poisson","Darroch","Gamma"), m=m, call=call)
     h <- valid.h.out$h
     htype <- valid.h.out$htype
@@ -22,10 +23,10 @@ closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
   theta <- valid.theta(theta = h.control$theta, htype = htype)
   neg <- valid.neg(neg = h.control$neg, htype = htype)
   
-  #### Initialisation du nom du modèle
+  #### Initialisation du nom du mod?le
   mname <- valid.mname(mname=NULL, m=m, htype=htype, theta=theta, call=call)         
   
-  #### Certains modèles ne peuvent être ajustés par closedp.bc
+  #### Certains mod?les ne peuvent ?tre ajust?s par closedp.bc
   if (dtype=="nbcap" && m%in%c("Mt","Mth","Mb","Mbh")) 
     stop("'X' cannot be of type 'nbcap' for models Mt, Mth, Mb and Mbh") 
   if( m == "Mbh" && t < 4 ) 
@@ -57,7 +58,7 @@ closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
       m2 <- ni[1] + ni[2] - n
       N <- (ni[1]+1)*(ni[2]+1)/(m2+1) - 1
       erreurtype <- sqrt((ni[1]+1)*(ni[2]+1)*(ni[1]-m2)*(ni[2]-m2)/((m2+2)*(m2+1)^2))
-    } else { # Seber p.131 et 133 avec correction des fréquences selon Rivest & Lévesque 2001
+    } else { # Seber p.131 et 133 avec correction des fr?quences selon Rivest & L?vesque 2001
       Nprelim <- closedpCI.0(X=X,dfreq=dfreq,m="M0")$results[1,1]
       ni.corr <- ni + (t+2)/(2*t)
       n.corr <- n + t/2
@@ -91,13 +92,13 @@ closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
       
     indicglm <- TRUE
     
-    ### Élaboration préliminaire du modèle
+    ### ?laboration pr?liminaire du mod?le
     if (m %in% c("Mb", "Mbh")) {
       Y <- getui(X=X, dfreq=dfreq, t=t)
       if(m=="Mbh") { omitY <- Y[1]; Y <- Y[-1]} 
       mX. <- if(m=="Mb") matrix(0:(t-1), ncol = 1) else matrix(0:(t-2), ncol = 1)
       colnames(mX.) <- "beta"
-      nca <- ncol(mX.)  ## En réalité cette valeur ne sera pas utilisée
+      nca <- ncol(mX.)  ## En r?alit? cette valeur ne sera pas utilis?e
       cst <- rep(0,length(Y))
     } else {
       getmX.out <- getmX(typet=typet, t=t, t0=t0, m=m, h=h, theta=theta)
@@ -107,7 +108,7 @@ closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
       cst <- getcst(typet=typet, tinf=FALSE, t=t, t0=t0, nbcap=nbcap)
     }
     
-    ### Ajustement des fréquences
+    ### Ajustement des fr?quences
     delta <- rep(0,length(Y))
     if (m %in% c("Mb", "Mbh")) {
       delta[1] <- +2
@@ -136,18 +137,18 @@ closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
     }
     Yd <- pmax(0,Y + delta)
     
-    ### Ajustement du modèle
+    ### Ajustement du mod?le
     fit.out <- closedp.fitone(n = n, Y = Yd, mX. = mX., nbcap = nbcap, nca = nca, 
                               cst = cst, htype = htype, neg = neg, ...)
     
-    # On arrête la fonction si l'ajustement n'a pas fonctionné
+    # On arr?te la fonction si l'ajustement n'a pas fonctionn?
     if (!is.null(fit.out$fit.err)) stop("error when fitting the model: ", fit.out$fit.err)
     
     # Sinon, on peut poursuivre les calculs
     glmo <- fit.out$fit
     glmo.warn <- fit.out$fit.warnings
     
-    # on retire les warnings pour les valeurs de Y non entières : ... "non-integer" ...
+    # on retire les warnings pour les valeurs de Y non enti?res : ... "non-integer" ...
     tokeep <- !grepl("non-integer", glmo.warn, fixed = TRUE)
     glmo.warn <- glmo.warn[tokeep]
     if (length(glmo.warn)==0) glmo.warn <- NULL
@@ -171,7 +172,7 @@ closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
     
   }
   
-  # Préparation des sorties
+  # Pr?paration des sorties
   results <- matrix(c(N, erreurtype, infoFit), 1, 3)
   dimnames(results) <- list(mname, c("abundance", "stderr", "infoFit")) 
   
@@ -180,7 +181,7 @@ closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
     # Si on a fait un calcul exact (Mt ou Mh Chao), on n'a pas besoin de 
     # conserver une trace des warnings, ceux-ci sont impossibles.    
     ans <- c(ans, list(glm.warn=glmo.warn))
-    # ID eta negatif enlevés si modèle Mth Chao
+    # ID eta negatif enlev?s si mod?le Mth Chao
     if (htype == "Chao") ans <- c(ans, fit.out["neg.eta"])
   }
   if (typet) ans$t0 <- NULL
@@ -188,7 +189,7 @@ closedp.bc <- function(X, dfreq=FALSE, dtype=c("hist","nbcap"), t=NULL, t0=t,
   ans
 }
 
-
+#' @export
 print.closedp.bc <- function(x, ...) {       
   cat("\nNumber of captured units:",x$n,"\n\n")
   cat("Abundance estimation with bias correction:\n")
