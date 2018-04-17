@@ -14,7 +14,7 @@ A \code{matrix} where each row represents model outputs and columns are variable
 suchs as number of individuals, intervals...
 }
 \description{
-To summarize results more efficients, use this function to merge them into one object.
+To summarize results more efficiently, use this function to merge them into one object.
 }
 \author{
 Roman Lustrik \email{roman.lustrik@biolitika.si}
